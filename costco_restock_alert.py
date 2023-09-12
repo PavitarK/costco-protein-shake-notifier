@@ -1,6 +1,6 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import smtplib
 import time
 import os
@@ -21,6 +21,7 @@ desired_price = 100.0
 recipient_email = os.getenv("RECEIVER_EMAIL_ADDRESS")
 sender_email = os.getenv("SENDER_EMAIL_ADDRESS")
 sender_password = os.getenv("SENDER_EMAIL_PASSWORD")
+user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
 
 def send_email(subject, message):
     try:
@@ -45,12 +46,11 @@ def send_email(subject, message):
 
 def check_price(product_url, product_name):
     try:        
-        #Start Selenium Instance
-        driver = webdriver.Chrome()
+        driver = start_selenium()
         driver.get(product_url)
         time.sleep(5)
+        # driver.get_screenshot_as_file("screenshot.png")
         
-        # Parse the HTML content of the page
         # Extract the product title, price, and availability
         product_price = driver.find_element(By.XPATH, product_price_xpath).text
         product_availability = driver.find_element(By.XPATH, product_status_xpath).get_attribute("value")
@@ -61,17 +61,25 @@ def check_price(product_url, product_name):
         if product_availability != out_of_stock:
            send_email(f"Restock Alert: {product_name}", f"The price of {product_name} is now ${product_price}. It is in stock at {product_url}.")
         else:
-            send_email(f"Stock Update: {product_name} Not in stock")
             print(f"{product_name} is not in stock.")
 
         # Close selenium 
         driver.close()
     except Exception as e:
         print(f"Error checking price: {e}")
+        
+def start_selenium(): 
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument('log-level=3')
+    chrome_options.add_argument(f'user-agent={user_agent}')
+    
+    driver = webdriver.Chrome(options=chrome_options)
+    
+    return driver 
 
 if __name__ == "__main__":
     while True:
         check_price(product_url=chocolate_product_url, product_name='Chocolate Milk Protein')
         check_price(product_url=vanilla_product_url, product_name="Vanilla Milk Protein")
-        # Sleep for a certain interval (e.g., 1 hour)
-        time.sleep(3600)  # Sleep for 1 hour (3600 seconds)
+        time.sleep(1800)  # Sleep for half an hour
