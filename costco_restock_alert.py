@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 import smtplib
 import time
 import os
+import chromedriver_autoinstaller
 from dotenv import load_dotenv
 
 # load environment files
@@ -17,7 +18,6 @@ product_price_xpath = '//*[@id="pull-right-price"]/span[1]'
 product_status_xpath = '//*[@id="add-to-cart-btn"]'
 out_of_stock = 'Out of Stock'
 
-desired_price = 100.0 
 recipient_email = os.getenv("RECEIVER_EMAIL_ADDRESS")
 sender_email = os.getenv("SENDER_EMAIL_ADDRESS")
 sender_password = os.getenv("SENDER_EMAIL_PASSWORD")
@@ -79,6 +79,9 @@ def start_selenium():
     return driver 
 
 if __name__ == "__main__":
+    # update chromedriver
+    # TODO: Test when chrome updates
+    chromedriver_autoinstaller.install()
     while True:
         check_price(product_url=chocolate_product_url, product_name='Chocolate Milk Protein')
         check_price(product_url=vanilla_product_url, product_name="Vanilla Milk Protein")
