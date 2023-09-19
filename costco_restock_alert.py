@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import smtplib
 import time
+import datetime
 import os
 import chromedriver_autoinstaller
 from dotenv import load_dotenv
@@ -48,7 +49,7 @@ def check_price(product_url, product_name):
     try:        
         driver = start_selenium()
         driver.get(product_url)
-        time.sleep(5)
+        time.sleep(2)
         # driver.get_screenshot_as_file("screenshot.png")
         
         # Extract the product title, price, and availability
@@ -63,10 +64,14 @@ def check_price(product_url, product_name):
         else:
             print(f"{product_name} is not in stock.")
 
+        # Daily email to verify script is running
+        # if datetime.datetime.now().hour >= 16 and datetime.datetime.now().hour < 17: 
+        #     send_email(f"Script Status", f"script is running.")
+        
         # Close selenium 
-        driver.close()
+        driver.quit()
     except Exception as e:
-        print(f"Error checking price: {e}")
+        send_email(f"Script Status", f"Error Checking Price")
         
 def start_selenium(): 
     chrome_options = Options()
@@ -82,7 +87,11 @@ if __name__ == "__main__":
     # update chromedriver
     # TODO: Test when chrome updates
     chromedriver_autoinstaller.install()
-    while True:
-        check_price(product_url=chocolate_product_url, product_name='Chocolate Milk Protein')
-        check_price(product_url=vanilla_product_url, product_name="Vanilla Milk Protein")
-        time.sleep(1800)  # Sleep for half an hour
+    
+    check_price(product_url=chocolate_product_url, product_name='Chocolate Milk Protein')
+    check_price(product_url=vanilla_product_url, product_name="Vanilla Milk Protein")
+    
+    # while True:
+    #     check_price(product_url=chocolate_product_url, product_name='Chocolate Milk Protein')
+    #     check_price(product_url=vanilla_product_url, product_name="Vanilla Milk Protein")
+    #     time.sleep(1800)  # Sleep for half an hour
